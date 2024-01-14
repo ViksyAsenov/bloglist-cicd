@@ -39,7 +39,7 @@ jobs:
           npm install
       - name: Check frontend style
         run: |
-          cd bloglgist-frontend
+          cd bloglist-frontend
           npm run eslint
       - name: Run frontend unit tests
         run: |
