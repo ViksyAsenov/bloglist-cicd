@@ -20,9 +20,7 @@ jobs:
         with:
           node-version: "16"
       - name: Create .env
-        run: |
-          cd bloglist-backend
-          echo "${{ secrets.ENV_FILE }}" > .env
+        run: echo "${{ secrets.ENV_FILE }}" > .env
       - name: Install backend dependencies
         run: |
           cd bloglist-backend
@@ -97,6 +95,6 @@ jobs:
         with:
           severity: info
           text: Pipeline succeeded. A new version was commited by ${{ github.actor }}
-          description: 'The new deploy is live: https://pokedex-cicd-8648.onrender.com and this is the commit: ${{ env.COMMIT_URL }}'
+          description: 'The new deploy is live: https://bloglist-cicd.onrender.com and this is the commit: ${{ env.COMMIT_URL }}'
           color: '#008000'
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
