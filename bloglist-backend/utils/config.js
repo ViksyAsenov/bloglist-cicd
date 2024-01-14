@@ -1,4 +1,6 @@
-require('dotenv').config()
+const path = require('path')
+const envPath = path.resolve(__dirname, '..', '..', '.env')
+require('dotenv').config({ path: envPath })
 
 const MONGODB_URI = process.env.NODE_ENV === 'test'
   ? process.env.TEST_MONGODB_URI

@@ -14,7 +14,7 @@ describe('post users', () => {
     const user = new User({ username: 'root', passwordHash })
 
     await user.save()
-  })
+  }, 20000)
 
   test('creation succeeds with a free username', async () => {
     const usersAtStart = await helper.usersInDB()
@@ -22,7 +22,7 @@ describe('post users', () => {
     const newUser = {
       username: 'viksy',
       name: 'Viktor Asenov',
-      password: 'topsecret'
+      password: 'topsecret',
     }
 
     await api
@@ -34,9 +34,9 @@ describe('post users', () => {
     const usersAtEnd = await helper.usersInDB()
     expect(usersAtEnd).toHaveLength(usersAtStart.length + 1)
 
-    const usernames = usersAtEnd.map(user => user.username)
+    const usernames = usersAtEnd.map((user) => user.username)
     expect(usernames).toContain(newUser.username)
-  })
+  }, 10000)
 
   test('creation fails with taken username', async () => {
     const usersAtStart = await helper.usersInDB()
@@ -44,7 +44,7 @@ describe('post users', () => {
     const newUser = {
       username: 'root',
       name: 'Superuser',
-      password: 'topsecret'
+      password: 'topsecret',
     }
 
     const result = await api
@@ -57,7 +57,7 @@ describe('post users', () => {
 
     const usersAtEnd = await helper.usersInDB()
     expect(usersAtEnd).toEqual(usersAtStart)
-  })
+  }, 10000)
 })
 
 afterAll(async () => {

@@ -1,0 +1,102 @@
+name: Deployment pipeline
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize]
+
+env:
+  COMMIT_URL: ${{github.server_url}}/${{github.repository}}/commit/${{github.sha}}
+  
+jobs:
+  deployment_pipeline:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+      - name: Create .env
+        run: |
+          cd bloglist-backend
+          echo "${{ secrets.ENV_FILE }}" > .env
+      - name: Install backend dependencies
+        run: |
+          cd bloglist-backend
+          npm install
+      - name: Check backend style
+        run: |
+          cd bloglist-backend
+          npm run eslint
+      - name: Run backend unit tests
+        run: |
+          cd bloglist-backend
+          npm run test
+      - name: Install frontend dependencies
+        run: |
+          cd bloglist-frontend
+          npm install
+      - name: Check frontend style
+        run: |
+          cd bloglgist-frontend
+          npm run eslint
+      - name: Run frontend unit tests
+        run: |
+          cd bloglist-frontend
+          npm run test
+      - name: Run e2e tests
+        uses: cypress-io/github-action@v5
+        with:
+          command: |
+            cd bloglist-backend
+            npm run start:test
+            cd ..
+            cd bloglist-frontend
+            npm start
+          start: |
+            cd bloglist-frontend
+            npm run test:e2e
+          wait-on: http://localhost:3000
+      - name: Build frontend project
+        run: |
+          cd bloglist-frontend
+          npm run build
+      - name: Deploy to production
+        if: ${{ github.event_name == 'push' }}
+        run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
+      - name: Send failure notification
+        if: ${{ failure() }}
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: error
+          text: 'Pipeline failed. ${{ github.actor }} commited some stupid code here: ${{ env.COMMIT_URL }}'
+          description: 'nothing has been changed to the master branch'
+          color: '#FF0000'
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+  tag_release:
+    needs: [simple_deployment_pipeline]
+    runs-on: ubuntu-20.04
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bump version and push tag
+        if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
+        uses: anothrNick/github-tag-action@1.64.0
+  send_notification:
+    needs: [tag_release]
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Send success notification
+        if: ${{ github.event_name == 'push' && success() }}
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: info
+          text: Pipeline succeeded. A new version was commited by ${{ github.actor }}
+          description: 'The new deploy is live: https://pokedex-cicd-8648.onrender.com and this is the commit: ${{ env.COMMIT_URL }}'
+          color: '#008000'
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}

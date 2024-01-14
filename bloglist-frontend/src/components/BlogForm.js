@@ -1,85 +1,74 @@
 import React, { useState } from 'react'
-import PropTypes from 'prop-types'
+import { useDispatch } from 'react-redux'
+import { Button } from './styles/Button.styled'
+import { Input } from './styles/Input.styled'
+import { BlogFormContainer, Form } from './styles/BlogForm.styled'
+import { setNotification } from '../reducers/notificationReducer'
+import { createBlog } from '../reducers/blogReducer'
 
-const BlogForm = ({ createBlog, defaultNotification, setNotification }) => {
+const BlogForm = ({ blogFormRef }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
+  const dispatch = useDispatch()
 
-  const addBlog = (event) => {
+  const addBlog = async (event) => {
     event.preventDefault()
 
-    if(title === '' || author === '' || url === '') {
+    if (title === '' || author === '' || url === '') {
       const newNotification = {
         message: 'Blog fields shouldn\'t be null',
-        positive: false
+        positive: false,
       }
-      setNotification(newNotification)
-
-      setTimeout(() => {
-        setNotification({ ...defaultNotification })
-      }, 3000)
+      dispatch(setNotification(newNotification, 3000))
 
       return
     }
 
-    createBlog({
-      title,
-      author,
-      url
-    })
+    try {
+      dispatch(createBlog(title, author, url))
+      blogFormRef.current.toggleVisibility()
+      const newNotification = {
+        message: `a new blog '${title}' by ${author} has been added`,
+        positive: true,
+      }
+      dispatch(setNotification(newNotification, 3000))
+    } catch (exception) {
+      const newNotification = {
+        message: `${exception.response.data.error}`,
+        positive: false,
+      }
+      dispatch(setNotification(newNotification, 3000))
+    }
 
     setTitle('')
     setAuthor('')
     setUrl('')
   }
+
   return (
-    <div>
-      <h2>Create a new blog</h2>
+    <BlogFormContainer>
+      <h2>Create a blog</h2>
 
-      <form onSubmit={addBlog}>
-        <div>
+      <Form onSubmit={addBlog}>
+        <div className="inputDiv">
           Title
-          <input
-            type='text'
-            value={title}
-            name='Title'
-            placeholder='write title here'
-            onChange={({ target }) => setTitle(target.value)}
-          />
+          <Input type="text" value={title} name="Title" onChange={({ target }) => setTitle(target.value)} />
         </div>
 
-        <div>
-        Author
-          <input
-            type='text'
-            value={author}
-            name='Author'
-            placeholder='write author here'
-            onChange={({ target }) => setAuthor(target.value)}
-          />
+        <div className="inputDiv">
+          Author
+          <Input type="text" value={author} name="Author" onChange={({ target }) => setAuthor(target.value)} />
         </div>
 
-        <div>
+        <div className="inputDiv">
           Url
-          <input
-            type='text'
-            value={url}
-            name='Url'
-            placeholder='write url here'
-            onChange={({ target }) => setUrl(target.value)}
-          />
+          <Input type="text" value={url} name="Url" onChange={({ target }) => setUrl(target.value)} />
         </div>
-        <button type="submit">create</button>
-      </form>
-    </div>
+        <Button type="submit">Create</Button>
+      </Form>
+    </BlogFormContainer>
   )
-}
-
-BlogForm.propTypes = {
-  createBlog: PropTypes.func.isRequired,
-  defaultNotification: PropTypes.object.isRequired,
-  setNotification: PropTypes.func.isRequired
 }
 
 export default BlogForm

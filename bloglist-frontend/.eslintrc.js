@@ -4,7 +4,7 @@ module.exports = {
     'browser': true,
     'es6': true,
     'jest/globals': true,
-    'cypress': true
+    'cypress/globals': true
   },
   'extends': [
     'eslint:recommended',
@@ -24,6 +24,14 @@ module.exports = {
     'indent': [
       'error',
       2
+    ],
+    'no-unused-vars': [
+      'error',
+      {
+        'argsIgnorePattern': '^_',
+        'varsIgnorePattern': '^_',
+        'caughtErrorsIgnorePattern': '^_'
+      }
     ],
     'linebreak-style': [
       'error',

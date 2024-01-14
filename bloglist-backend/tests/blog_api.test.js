@@ -10,38 +10,38 @@ beforeEach(async () => {
   await Blog.deleteMany({})
   await User.deleteMany({})
 
-  const blogObjects = helper.initialBlogs.map(b => new Blog(b))
+  const blogObjects = helper.initialBlogs.map((b) => new Blog(b))
 
-  const promiseArr = blogObjects.map(blog => blog.save())
+  const promiseArr = blogObjects.map((blog) => blog.save())
   await Promise.all(promiseArr)
-})
+}, 10000)
 
 describe('get blogs', () => {
-  test('blogs are returned as json', async() => {
+  test('blogs are returned as json', async () => {
     await api
       .get('/api/blogs')
       .expect(200)
       .expect('Content-Type', /application\/json/)
-  })
+  }, 10000)
 
   test('a specific blog is within the returned blogs', async () => {
     const response = await api.get('/api/blogs')
 
-    const titles = response.body.map(r => r.title)
+    const titles = response.body.map((r) => r.title)
     expect(titles).toContain('Dojo Mojo House')
-  })
+  }, 10000)
 
   test('all blogs are returned', async () => {
     const response = await api.get('/api/blogs')
 
     expect(response.body).toHaveLength(helper.initialBlogs.length)
-  })
+  }, 10000)
 
   test('unique identifier property of a blog is id', async () => {
     const response = await api.get('/api/blogs')
 
     expect(response.body[0].id).toBeDefined()
-  })
+  }, 10000)
 })
 
 describe('post blogs', () => {
@@ -54,16 +54,12 @@ describe('post blogs', () => {
       password: 'topsecret',
     }
 
-    await api
-      .post('/api/users')
-      .send(newUser)
+    await api.post('/api/users').send(newUser)
 
-    const result = await api
-      .post('/api/login')
-      .send(newUser)
+    const result = await api.post('/api/login').send(newUser)
 
     headers = {
-      'Authorization': `Bearer ${result.body.token}`
+      Authorization: `Bearer ${result.body.token}`,
     }
   })
 
@@ -72,7 +68,7 @@ describe('post blogs', () => {
       title: 'a new blog',
       author: 'user',
       url: 'http://user.bg.com',
-      likes: 34
+      likes: 34,
     }
 
     await api
@@ -85,10 +81,10 @@ describe('post blogs', () => {
     const blogsAtEnd = await helper.blogsInDB()
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
 
-    const titles = blogsAtEnd.map(b => b.title)
+    const titles = blogsAtEnd.map((b) => b.title)
 
     expect(titles).toContain('a new blog')
-  })
+  }, 10000)
 
   test('a blog without likes property can be added and likes will have default value of 0', async () => {
     const newBlog = {
@@ -106,25 +102,21 @@ describe('post blogs', () => {
 
     const blogsAtEnd = await helper.blogsInDB()
 
-    const addedBlog = blogsAtEnd.find(b => b.title === 'a new blog')
+    const addedBlog = blogsAtEnd.find((b) => b.title === 'a new blog')
     expect(addedBlog.likes).toBe(0)
-  })
+  }, 10000)
 
   test('an invalid blog should respond with 400', async () => {
     const newBlog = {
       author: 'user',
-      likes: 54
+      likes: 54,
     }
 
-    await api
-      .post('/api/blogs')
-      .send(newBlog)
-      .set(headers)
-      .expect(400)
+    await api.post('/api/blogs').send(newBlog).set(headers).expect(400)
 
     const blogsAtEnd = await helper.blogsInDB()
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
-  })
+  }, 10000)
 })
 
 describe('put blogs', () => {
@@ -137,16 +129,12 @@ describe('put blogs', () => {
       password: 'topsecret',
     }
 
-    await api
-      .post('/api/users')
-      .send(newUser)
+    await api.post('/api/users').send(newUser)
 
-    const result = await api
-      .post('/api/login')
-      .send(newUser)
+    const result = await api.post('/api/login').send(newUser)
 
     headers = {
-      'Authorization': `Bearer ${result.body.token}`
+      Authorization: `Bearer ${result.body.token}`,
     }
   })
 
@@ -155,7 +143,7 @@ describe('put blogs', () => {
       title: 'A new blog',
       author: 'user',
       url: 'www.abc.com',
-      likes: 5
+      likes: 5,
     }
 
     let uploadedBlogResult = await api
@@ -171,7 +159,7 @@ describe('put blogs', () => {
       title: 'A new blog',
       author: 'user',
       url: 'www.abc.com',
-      likes: 25
+      likes: 25,
     }
 
     await api
@@ -184,9 +172,11 @@ describe('put blogs', () => {
     const blogsAfterUpdate = await helper.blogsInDB()
     expect(blogsBeforeUpdate.length).toBe(blogsAfterUpdate.length)
 
-    const updatedBlogFromDB = blogsAfterUpdate.find(b => b.title === updatedBlog.title)
+    const updatedBlogFromDB = blogsAfterUpdate.find(
+      (b) => b.title === updatedBlog.title
+    )
     expect(updatedBlogFromDB.likes).toBe(25)
-  })
+  }, 10000)
 })
 
 describe('delete blogs', () => {
@@ -199,16 +189,12 @@ describe('delete blogs', () => {
       password: 'topsecret',
     }
 
-    await api
-      .post('/api/users')
-      .send(newUser)
+    await api.post('/api/users').send(newUser)
 
-    const result = await api
-      .post('/api/login')
-      .send(newUser)
+    const result = await api.post('/api/login').send(newUser)
 
     headers = {
-      'Authorization': `Bearer ${result.body.token}`
+      Authorization: `Bearer ${result.body.token}`,
     }
   })
 
@@ -217,31 +203,26 @@ describe('delete blogs', () => {
       title: 'A new blog',
       author: 'user',
       url: 'www.abc.com',
-      likes: 5
+      likes: 5,
     }
 
-    await api
-      .post('/api/blogs')
-      .send(newBlog)
-      .set(headers)
-      .expect(201)
+    await api.post('/api/blogs').send(newBlog).set(headers).expect(201)
 
     const blogsAtStart = await helper.blogsInDB()
-    const blogToDelete = blogsAtStart.find(blog => blog.title === newBlog.title)
+    const blogToDelete = blogsAtStart.find(
+      (blog) => blog.title === newBlog.title
+    )
 
-    await api
-      .delete(`/api/blogs/${blogToDelete.id}`)
-      .set(headers)
-      .expect(204)
+    await api.delete(`/api/blogs/${blogToDelete.id}`).set(headers).expect(204)
 
     const blogsAtEnd = await helper.blogsInDB()
 
     expect(blogsAtEnd).toHaveLength(blogsAtStart.length - 1)
 
-    const titles = blogsAtEnd.map(b => b.title)
+    const titles = blogsAtEnd.map((b) => b.title)
 
     expect(titles).not.toContain(blogToDelete.title)
-  })
+  }, 10000)
 })
 
 afterAll(async () => {

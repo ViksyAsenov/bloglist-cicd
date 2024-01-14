@@ -1,4 +1,6 @@
 import { React, useState, forwardRef, useImperativeHandle } from 'react'
+import { Button } from './styles/Button.styled'
+import { TogglableContainer } from './styles/Togglable.styled'
 import PropTypes from 'prop-types'
 
 const Togglable = forwardRef((props, refs) => {
@@ -13,27 +15,29 @@ const Togglable = forwardRef((props, refs) => {
 
   useImperativeHandle(refs, () => {
     return {
-      toggleVisibility
+      toggleVisibility,
     }
   })
 
   return (
-    <div>
+    <TogglableContainer>
       <div style={hideWhenVisible}>
-        <button onClick={toggleVisibility}>{props.buttonLabel}</button>
+        <Button onClick={toggleVisibility}>{props.buttonLabel}</Button>
       </div>
-      <div style={showWhenVisible}>
-        {props.children}
-        <button onClick={toggleVisibility}>cancel</button>
+      <div style={showWhenVisible} id="toggleContainer">
+        <Button onClick={toggleVisibility} id="cancelButton">
+          Cancel
+        </Button>
+        <div id="props">{props.children}</div>
       </div>
-    </div>
+    </TogglableContainer>
   )
 })
 
 Togglable.displayName = 'Togglable'
 
 Togglable.propTypes = {
-  buttonLabel: PropTypes.string.isRequired
+  buttonLabel: PropTypes.string.isRequired,
 }
 
 export default Togglable
