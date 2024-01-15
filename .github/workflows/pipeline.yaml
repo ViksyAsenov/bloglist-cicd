@@ -45,6 +45,9 @@ jobs:
         run: |
           cd bloglist-frontend
           npm run test
+      - name: Start backend
+        working-directory: ./bloglist-backend
+        run: npm run start:test &
       - name: Run e2e tests
         uses: cypress-io/github-action@v5
         with:
