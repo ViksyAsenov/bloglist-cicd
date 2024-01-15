@@ -34,5 +34,3 @@ else
 fi
 
 cp -r ../bloglist-frontend/build .
-
-npm start
