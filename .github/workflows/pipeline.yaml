@@ -46,17 +46,15 @@ jobs:
           cd bloglist-frontend
           npm run test
       - name: Run e2e tests
+        run: |
+          cd bloglist-backend
+          npm run start:test
         uses: cypress-io/github-action@v5
         with:
-          command: |
-            cd bloglist-backend
-            npm run start:test
-            cd ..
-            cd bloglist-frontend
-            npm start
+          command: npm run test:e2e
           start: |
             cd bloglist-frontend
-            npm run test:e2e
+            npm start
           wait-on: http://localhost:3000
       - name: Build frontend project
         run: |
